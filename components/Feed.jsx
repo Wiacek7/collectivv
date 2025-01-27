@@ -70,7 +70,25 @@ const Feed = ({ onRefresh }) => {
       {!isLoading && !error && (
         <div className="space-y-6">
           {posts.length > 0 ? (
-            posts.map((post) => <PostItem key={post.stream_id} post={post} />)
+            posts.map((post) => {
+              // Ensure metadata.points exists
+              if (!post.creator_details.metadata) {
+                post.creator_details.metadata = { points: 0 };
+              } else if (!post.creator_details.metadata.points) {
+                post.creator_details.metadata.points = 0;
+              }
+
+              const creatorPoints = post.creator_details.metadata.points;
+              console.log('Post ID:', post.stream_id, 'Creator Points:', creatorPoints); // Debug log
+
+              return (
+                <PostItem
+                  key={post.stream_id}
+                  post={post}
+                  creatorPoints={creatorPoints} // Pass creatorPoints as a prop
+                />
+              );
+            })
           ) : (
             <div className="text-center text-gray-500">
               No posts found. Be the first to create one!

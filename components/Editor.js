@@ -21,6 +21,12 @@ const Editor = ({ post, onPostCreated }) => {
   const dropdownRef = useRef(null);
   const textareaRef = useRef();
 
+  // Define the points rules
+const POINTS_RULES = {
+  CREATE_POST: 10, // Example: Award 10 points for creating a post
+  // Add other rules as needed
+};
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -97,43 +103,43 @@ const Editor = ({ post, onPostCreated }) => {
     }
     setMediaLoading(false);
   };
+// Function to award points
+async function awardPoints(did, points) {
+  try {
+    // Fetch the user's current profile
+    const { data: profile } = await orbis.getProfile(did);
 
-  // Function to award points
-  async function awardPoints(did, points) {
-    try {
-      // Fetch the user's current profile
-      const { data: profile } = await orbis.getProfile(did);
-
-      if (!profile) {
-        throw new Error('User profile not found');
-      }
-
-      // Get the current points from the profile metadata (default to 0 if not set)
-      const currentPoints = profile.details?.metadata?.points || 0;
-
-      // Calculate the new points total
-      const newPoints = currentPoints + points;
-
-      // Update the user's profile with the new points total
-      const updateRes = await orbis.updateProfile({
-        ...profile.details.profile,
-        metadata: {
-          ...profile.details.metadata,
-          points: newPoints, // Update the points in metadata
-        },
-      });
-
-      if (updateRes.status === 200) {
-        console.log('Points awarded successfully:', { did, points: newPoints });
-        return { success: true, did, points: newPoints };
-      } else {
-        throw new Error(updateRes.error || 'Failed to update profile');
-      }
-    } catch (error) {
-      console.error('Error awarding points:', error);
-      return { success: false, error: error.message };
+    if (!profile) {
+      throw new Error('User profile not found');
     }
+
+    // Get the current points from the profile metadata (default to 0 if not set)
+    const currentPoints = profile.details?.metadata?.points || 0;
+    console.log('Current Points:', currentPoints); // Debug log
+
+    // Calculate the new points total
+    const newPoints = currentPoints + points;
+
+    // Update the user's profile with the new points total
+    const updateRes = await orbis.updateProfile({
+      ...profile.details.profile,
+      metadata: {
+        ...profile.details.metadata,
+        points: newPoints, // Update the points in metadata
+      },
+    });
+
+    if (updateRes.status === 200) {
+      console.log('Points awarded successfully:', { did, points: newPoints });
+      return { success: true, did, points: newPoints };
+    } else {
+      throw new Error(updateRes.error || 'Failed to update profile');
+    }
+  } catch (error) {
+    console.error('Error awarding points:', error);
+    return { success: false, error: error.message };
   }
+}
 
   // Function to generate post content using AI
   const generatePostWithAI = async () => {
@@ -174,20 +180,20 @@ const Editor = ({ post, onPostCreated }) => {
       setError('Please select a category');
       return;
     }
-
+  
     if (!title.trim()) {
       setError('Please enter a title');
       return;
     }
-
+  
     if (!body.trim()) {
       setError('Please enter content');
       return;
     }
-
+  
     setStatus(1);
     setError('');
-
+  
     try {
       const content = {
         title: title.trim(),
@@ -195,16 +201,16 @@ const Editor = ({ post, onPostCreated }) => {
         context: category,
         media: media,
       };
-
+  
       const res = post
         ? await orbis.editPost(post.stream_id, content)
         : await orbis.createPost(content);
-
+  
       if (res.status === 200) {
         // Only award points for new posts
         if (!post && user) {
           // Award points but don't wait for it
-          awardPoints(user.did, POINTS_RULES.CREATE_POST)
+          awardPoints(user.did, 10) // Example: Award 10 points for creating a post
             .then((response) => {
               if (response.success) {
                 console.log('Points awarded successfully:', response);
@@ -216,19 +222,23 @@ const Editor = ({ post, onPostCreated }) => {
               console.error('Error awarding points:', error);
             });
         }
-
+  
         setStatus(2);
-
+  
         // Clear form immediately after successful post
-        resetForm();
-
+        setTitle('');
+        setBody('');
+        setMedia([]);
+        setCategory('');
+        setError('');
+  
         // Notify parent component about the new post
         if (onPostCreated) {
-          await onPostCreated();
+          await onPostCreated(); // Trigger feed refresh
         }
-
+  
         await sleep(500);
-
+  
         // Only navigate if we're not already on the home page
         if (router.pathname !== '/') {
           await router.replace('/');
@@ -245,6 +255,7 @@ const Editor = ({ post, onPostCreated }) => {
     }
   }
 
+  
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm">
       <div className="p-4">

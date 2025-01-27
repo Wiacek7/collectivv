@@ -9,13 +9,7 @@ import Upvote from './Upvote';
 import { marked } from 'marked';
 import parse from 'html-react-parser';
 import DOMPurify from 'dompurify';
-import {
-  FaShare,
-  FaTag,
-  FaEthereum,
-  FaEllipsisH,
-  FaStar,
-} from 'react-icons/fa';
+import { FaShare, FaTag, FaEthereum, FaEllipsisH, FaStar } from 'react-icons/fa';
 import DonateButton from './DonateButton';
 import { CATEGORIES } from '../config/categories';
 import useOutsideClick from '../hooks/useOutsideClick';
@@ -28,7 +22,7 @@ if (!TimeAgo.getDefaultLocale()) {
 const timeAgo = new TimeAgo('en-US');
 
 export default function PostItem({ post, creatorPoints }) {
-  const { orbis, user } = useOrbis(); // Use orbis from useOrbis hook
+  const { orbis, user } = useOrbis();
   const [hasLiked, setHasLiked] = useState(false);
   const [categories, setCategories] = useState([]);
   const [updatedPost, setUpdatedPost] = useState(post);
@@ -52,20 +46,18 @@ export default function PostItem({ post, creatorPoints }) {
 
   // Convert CATEGORIES object into an array of categories
   useEffect(() => {
-    const categoriesArray = Object.entries(CATEGORIES).map(
-      ([stream_id, content]) => ({
-        stream_id,
-        content,
-      })
-    );
+    const categoriesArray = Object.entries(CATEGORIES).map(([stream_id, content]) => ({
+      stream_id,
+      content,
+    }));
 
     setCategories(categoriesArray);
   }, []);
 
   // Safely find the category name
-  const categoryName =
-    categories.find((cat) => cat.stream_id === post.content.context)?.content
-      ?.label || 'General';
+  const categoryName = categories.find(
+    (cat) => cat.stream_id === post.content.context
+  )?.content?.label || "General";
 
   async function loadDonations() {
     try {
@@ -240,8 +232,7 @@ export default function PostItem({ post, creatorPoints }) {
     }).format(amount);
   };
 
-  const showDonateButton =
-    CATEGORIES[post.content?.context]?.enableDonation || false;
+  const showDonateButton = CATEGORIES[post.content?.context]?.enableDonation || false;
 
   return (
     <div className="bg-white dark:bg-dark-secondary rounded-lg shadow-sm border border-gray-200 dark:border-dark-border overflow-hidden">
@@ -339,20 +330,14 @@ export default function PostItem({ post, creatorPoints }) {
                   }
                   disabled={isLoading}
                 >
-                  <CommentsIcon className="mr-3" />{' '}
-                  {/* Increased margin-right */}
+                  <CommentsIcon className="mr-3" /> {/* Increased margin-right */}
                   {post.count_replies || 0}
                 </button>
 
                 <div className="flex items-center group">
                   <button className="group flex items-center space-x-2 text-gray-500 hover:text-yellow-500">
                     <span className="text-sm font-medium">
-                      <Upvote
-                        like={like}
-                        active={hasLiked}
-                        count={updatedPost.count_likes || 0}
-                        disabled={isLoading}
-                      />
+                    
                     </span>
                   </button>
                 </div>
@@ -363,14 +348,14 @@ export default function PostItem({ post, creatorPoints }) {
                   disabled={isLoading}
                 >
                   <FaShare className="mr-1" />
-                  Share
+                  
                 </button>
 
                 {/* Display Creator's Points */}
-                <div className="flex items-center">
-                  <FaStar className="mr-1 text-yellow-500" />
-                  <span>{creatorPoints ?? 0} Points</span>
-                </div>
+                <div className="flex items-center space-x-2">
+  <FaStar className="mr-1 text-yellow-500" />
+  <span className="text-sm text-gray-500">{creatorPoints} Pts</span>
+</div>
 
                 {showDonateButton && (
                   <>
