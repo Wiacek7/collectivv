@@ -1,4 +1,3 @@
-import { initDb } from '../lib/db';
 import '@/styles/globals.css';
 import { Orbis, OrbisProvider } from '@orbisclub/components';
 import '@orbisclub/components/dist/index.modern.css';
